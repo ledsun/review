@@ -2,10 +2,34 @@
 
 Git の最新コミット差分を取得し、Copilot (gpt-5-mini) でレビュー結果をストリーミング表示する CLI です。
 
+## ビルド
+
+```bash
+go build -o review ./cmd/review
+```
+
+Windows の場合:
+
+```powershell
+go build -o review.exe .\cmd\review
+```
+
 ## 使い方
 
 ```bash
 go run ./cmd/review
+```
+
+ビルド済みバイナリを使う場合:
+
+```bash
+./review
+```
+
+Windows の場合:
+
+```powershell
+.\review.exe
 ```
 
 ## 仕様
