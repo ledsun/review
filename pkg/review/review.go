@@ -11,6 +11,7 @@ import (
 
 type Runner struct {
 	Copilot *copilot.Client
+	Verbose bool
 }
 
 func NewRunner(client *copilot.Client) *Runner {
@@ -46,5 +47,9 @@ func (r *Runner) Run(rawDiff string, out, errOut io.Writer) error {
 
 	_, _ = fmt.Fprintln(out, "Analyzing diff...")
 	prompt := BuildPrompt(files, rawDiff)
+	if r.Verbose {
+		_, _ = fmt.Fprintln(out, "Prompt:")
+		_, _ = fmt.Fprintln(out, prompt)
+	}
 	return r.Copilot.Review(prompt, out, errOut)
 }

@@ -20,6 +20,12 @@ go build -o review.exe .\cmd\review
 go run ./cmd/review
 ```
 
+プロンプトも確認する場合:
+
+```bash
+go run ./cmd/review --verbose
+```
+
 ビルド済みバイナリを使う場合:
 
 ```bash
@@ -32,11 +38,18 @@ Windows の場合:
 .\review.exe
 ```
 
+Windows でプロンプトも表示する場合:
+
+```powershell
+.\review.exe --verbose
+```
+
 ## 仕様
 
 - diff 取得: `git diff -W -U3 HEAD~1 HEAD`
 - diff 行数が 300 行を超えた場合は `Diff too large (max 300 lines)` で終了
 - diff が空の場合は `No diff found` を表示して終了
+- `--verbose` 指定時は Copilot に送信するプロンプトを標準出力へ表示
 
 ## 依存
 
