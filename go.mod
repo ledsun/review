@@ -1,3 +1,7 @@
 module review
 
-go 1.22
+go 1.24
+
+require github.com/github/copilot-sdk/go v0.1.31
+
+require github.com/google/jsonschema-go v0.4.2 // indirect

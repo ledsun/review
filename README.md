@@ -1,6 +1,6 @@
 # review CLI
 
-Git の最新コミット差分を取得し、Copilot (gpt-5-mini) でレビュー結果をストリーミング表示する CLI です。
+Git の最新コミット差分を取得し、GitHub Copilot SDK for Go 経由でレビュー結果をストリーミング表示する CLI です。
 
 ## ビルド
 
@@ -54,4 +54,5 @@ Windows でプロンプトも表示する場合:
 ## 依存
 
 - Git
+- Go 1.24 以上
 - GitHub Copilot CLI (`copilot` コマンド)
