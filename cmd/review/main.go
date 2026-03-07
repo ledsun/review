@@ -39,6 +39,10 @@ func run(args []string) error {
 	if err != nil {
 		return err
 	}
+	commitMessage, err := git.LatestCommitMessage()
+	if err != nil {
+		return err
+	}
 
 	if diff.CountLines(rawDiff) == 0 {
 		fmt.Fprintln(os.Stdout, "No diff found")
@@ -47,7 +51,7 @@ func run(args []string) error {
 
 	runner := review.NewRunner(copilot.New("gpt-5-mini"))
 	runner.Verbose = *verbose
-	if err := runner.Run(rawDiff, os.Stdout, os.Stderr); err != nil {
+	if err := runner.Run(commitMessage, rawDiff, os.Stdout, os.Stderr); err != nil {
 		if errors.Is(err, diff.ErrTooLarge) {
 			return err
 		}

@@ -24,3 +24,12 @@ func LatestCommitDiff() (string, error) {
 	}
 	return string(out), nil
 }
+
+func LatestCommitMessage() (string, error) {
+	cmd := exec.Command("git", "log", "-1", "--pretty=%B")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("failed to get latest commit message: %w: %s", err, string(out))
+	}
+	return string(out), nil
+}
