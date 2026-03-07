@@ -47,7 +47,7 @@ Windows でプロンプトも表示する場合:
 ## 仕様
 
 - diff 取得: `git diff -W -U3 HEAD~1 HEAD`
-- diff 行数が 300 行を超えた場合は `Diff too large (max 300 lines)` で終了
+- diff 行数が 300 行を超えた場合は `Diff too large (<current> lines, max 300 lines)` で終了
 - diff が空の場合は `No diff found` を表示して終了
 - `--verbose` 指定時は Copilot に送信するプロンプトを標準出力へ表示
 
