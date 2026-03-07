@@ -36,20 +36,20 @@ func BuildPrompt(files []diff.FileDiff, rawDiff string) string {
 }
 
 func (r *Runner) Run(rawDiff string, out, errOut io.Writer) error {
-	if err := diff.ValidateSize(rawDiff); err != nil {
-		return err
-	}
 	files := diff.Parse(rawDiff)
 	if len(files) == 0 {
 		_, _ = fmt.Fprintln(out, "No diff found")
 		return nil
 	}
 
-	_, _ = fmt.Fprintln(out, "Analyzing diff...")
 	prompt := BuildPrompt(files, rawDiff)
 	if r.Verbose {
 		_, _ = fmt.Fprintln(out, "Prompt:")
 		_, _ = fmt.Fprintln(out, prompt)
 	}
+	if err := diff.ValidateSize(rawDiff); err != nil {
+		return err
+	}
+	_, _ = fmt.Fprintln(out, "Analyzing diff...")
 	return r.Copilot.Review(prompt, out, errOut)
 }

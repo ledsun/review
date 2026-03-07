@@ -2,12 +2,25 @@ package diff
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
 const MaxLines = 300
 
-var ErrTooLarge = errors.New("Diff too large (max 300 lines)")
+var ErrTooLarge = errors.New("diff too large")
+
+type TooLargeError struct {
+	Lines int
+}
+
+func (e *TooLargeError) Error() string {
+	return fmt.Sprintf("Diff too large (%d lines, max %d lines)", e.Lines, MaxLines)
+}
+
+func (e *TooLargeError) Is(target error) bool {
+	return target == ErrTooLarge
+}
 
 type Hunk struct {
 	Header string
@@ -32,8 +45,9 @@ func CountLines(raw string) int {
 }
 
 func ValidateSize(raw string) error {
-	if CountLines(raw) > MaxLines {
-		return ErrTooLarge
+	lines := CountLines(raw)
+	if lines > MaxLines {
+		return &TooLargeError{Lines: lines}
 	}
 	return nil
 }

@@ -49,7 +49,7 @@ func run(args []string) error {
 	runner.Verbose = *verbose
 	if err := runner.Run(rawDiff, os.Stdout, os.Stderr); err != nil {
 		if errors.Is(err, diff.ErrTooLarge) {
-			return diff.ErrTooLarge
+			return err
 		}
 		return err
 	}
