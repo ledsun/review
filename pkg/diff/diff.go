@@ -6,16 +6,20 @@ import (
 	"strings"
 )
 
-const MaxLines = 300
+const (
+	DefaultMaxLines    = 300
+	LimitBreakMaxLines = 3000
+)
 
 var ErrTooLarge = errors.New("diff too large")
 
 type TooLargeError struct {
-	Lines int
+	Lines    int
+	MaxLines int
 }
 
 func (e *TooLargeError) Error() string {
-	return fmt.Sprintf("Diff too large (%d lines, max %d lines)", e.Lines, MaxLines)
+	return fmt.Sprintf("Diff too large (%d lines, max %d lines)", e.Lines, e.MaxLines)
 }
 
 func (e *TooLargeError) Is(target error) bool {
@@ -44,10 +48,10 @@ func CountLines(raw string) int {
 	return len(strings.Split(trimmed, "\n"))
 }
 
-func ValidateSize(raw string) error {
+func ValidateSize(raw string, maxLines int) error {
 	lines := CountLines(raw)
-	if lines > MaxLines {
-		return &TooLargeError{Lines: lines}
+	if lines > maxLines {
+		return &TooLargeError{Lines: lines, MaxLines: maxLines}
 	}
 	return nil
 }

@@ -24,6 +24,7 @@ func run(args []string) error {
 	fs.SetOutput(os.Stderr)
 
 	verbose := fs.Bool("verbose", false, "print the prompt before sending it to Copilot")
+	limitBreak := fs.Bool("limit-break", false, "raise the diff line limit from 300 to 3000")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -51,6 +52,9 @@ func run(args []string) error {
 
 	runner := review.NewRunner(copilot.New("gpt-5-mini"))
 	runner.Verbose = *verbose
+	if *limitBreak {
+		runner.MaxDiffLines = diff.LimitBreakMaxLines
+	}
 	if err := runner.Run(commitMessage, rawDiff, os.Stdout, os.Stderr); err != nil {
 		if errors.Is(err, diff.ErrTooLarge) {
 			return err
