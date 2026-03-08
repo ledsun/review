@@ -8,8 +8,15 @@ import (
 
 var ErrNotInstalled = errors.New("git is not installed")
 
+var (
+	lookPath = exec.LookPath
+	runGit   = func(args ...string) ([]byte, error) {
+		return exec.Command("git", args...).CombinedOutput()
+	}
+)
+
 func CheckInstalled() error {
-	if _, err := exec.LookPath("git"); err != nil {
+	if _, err := lookPath("git"); err != nil {
 		return ErrNotInstalled
 	}
 	return nil
@@ -17,8 +24,7 @@ func CheckInstalled() error {
 
 // LatestCommitDiff returns the full-function context diff for the latest commit.
 func LatestCommitDiff() (string, error) {
-	cmd := exec.Command("git", "diff", "-W", "-U3", "HEAD~1", "HEAD")
-	out, err := cmd.CombinedOutput()
+	out, err := runGit("diff", "-W", "-U3", "HEAD~1", "HEAD")
 	if err != nil {
 		return "", fmt.Errorf("failed to get latest commit diff: %w: %s", err, string(out))
 	}
@@ -26,8 +32,7 @@ func LatestCommitDiff() (string, error) {
 }
 
 func LatestCommitMessage() (string, error) {
-	cmd := exec.Command("git", "log", "-1", "--pretty=%B")
-	out, err := cmd.CombinedOutput()
+	out, err := runGit("log", "-1", "--pretty=%B")
 	if err != nil {
 		return "", fmt.Errorf("failed to get latest commit message: %w: %s", err, string(out))
 	}

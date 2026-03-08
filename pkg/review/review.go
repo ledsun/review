@@ -5,17 +5,20 @@ import (
 	"io"
 	"strings"
 
-	"review/pkg/copilot"
 	"review/pkg/diff"
 )
 
+type Reviewer interface {
+	Review(prompt string, stdout, stderr io.Writer) error
+}
+
 type Runner struct {
-	Copilot      *copilot.Client
+	Copilot      Reviewer
 	Verbose      bool
 	MaxDiffLines int
 }
 
-func NewRunner(client *copilot.Client) *Runner {
+func NewRunner(client Reviewer) *Runner {
 	return &Runner{
 		Copilot:      client,
 		MaxDiffLines: diff.DefaultMaxLines,
