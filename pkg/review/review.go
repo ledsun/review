@@ -1,12 +1,20 @@
 package review
 
 import (
+	"bytes"
+	_ "embed"
 	"fmt"
 	"io"
 	"strings"
+	"text/template"
 
 	"review/pkg/diff"
 )
+
+//go:embed prompt.tmpl
+var promptTemplateText string
+
+var promptTemplate = template.Must(template.New("prompt").Parse(promptTemplateText))
 
 type Reviewer interface {
 	Review(prompt string, stdout, stderr io.Writer) error
@@ -25,34 +33,31 @@ func NewRunner(client Reviewer) *Runner {
 	}
 }
 
-func BuildPrompt(commitMessage string, files []diff.FileDiff, rawDiff string) string {
-	var b strings.Builder
-	b.WriteString("あなたは実践的なコードレビューをするお嬢様「皇戸麗風子」です。\n")
-	b.WriteString("以下の最新コミットのコミットメッセージ､ファイル一覧、差分を見て、コミットメッセージと修正内容に相違はないか？タイプミスはないか？確認してください。\n")
-	b.WriteString("静的に解析してください。CLI、build、format コマンドは実行しないでください。\n")
-	b.WriteString("語尾は以下を参考にしてください。\n")
-	b.WriteString("- ですの\n")
-	b.WriteString("- ございますわ\n")
-	b.WriteString("- いますの\n")
-	b.WriteString("- いませんの\n")
-	b.WriteString("- でしょうか\n")
-	b.WriteString("- かしら\n\n")
-	b.WriteString("出力形式:\n")
-	b.WriteString("メッセージの齟齬\n- ...\n\nタイプミス\n- ...\n\n以上ですの。\n\n")
-	b.WriteString("コミットメッセージ:\n")
-	b.WriteString(commitMessage)
-	if !strings.HasSuffix(commitMessage, "\n") {
-		b.WriteString("\n")
+type PromptData struct {
+	CommitMessage string
+	Files         []diff.FileDiff
+	RawDiff       string
+}
+
+func BuildPrompt(commitMessage string, files []diff.FileDiff, rawDiff string) (string, error) {
+	data := PromptData{
+		CommitMessage: ensureTrailingNewline(commitMessage),
+		Files:         files,
+		RawDiff:       rawDiff,
 	}
-	b.WriteString("ファイル一覧:\n")
-	for _, f := range files {
-		b.WriteString("- ")
-		b.WriteString(f.FileName)
-		b.WriteString("\n")
+
+	var b bytes.Buffer
+	if err := promptTemplate.Execute(&b, data); err != nil {
+		return "", fmt.Errorf("build prompt: %w", err)
 	}
-	b.WriteString("\n差分:\n")
-	b.WriteString(rawDiff)
-	return b.String()
+	return strings.TrimSuffix(b.String(), "\n"), nil
+}
+
+func ensureTrailingNewline(s string) string {
+	if strings.HasSuffix(s, "\n") {
+		return s
+	}
+	return s + "\n"
 }
 
 func (r *Runner) Run(commitMessage, rawDiff string, out, errOut io.Writer) error {
@@ -62,7 +67,10 @@ func (r *Runner) Run(commitMessage, rawDiff string, out, errOut io.Writer) error
 		return nil
 	}
 
-	prompt := BuildPrompt(commitMessage, files, rawDiff)
+	prompt, err := BuildPrompt(commitMessage, files, rawDiff)
+	if err != nil {
+		return err
+	}
 	if r.Verbose {
 		_, _ = fmt.Fprintln(out, "Prompt:")
 		_, _ = fmt.Fprintln(out, prompt)

@@ -31,13 +31,27 @@ func TestNewRunnerSetsDefaultLimit(t *testing.T) {
 func TestBuildPromptAddsCommitMessageNewlineAndFiles(t *testing.T) {
 	files := []diff.FileDiff{{FileName: "pkg/review/review.go"}}
 
-	prompt := BuildPrompt("feat: test", files, "diff --git a b")
+	prompt, err := BuildPrompt("feat: test", files, "diff --git a b")
+	if err != nil {
+		t.Fatalf("BuildPrompt() error = %v, want nil", err)
+	}
 
 	if !strings.Contains(prompt, "コミットメッセージ:\nfeat: test\nファイル一覧:\n- pkg/review/review.go\n") {
 		t.Fatalf("BuildPrompt() prompt missing expected sections:\n%s", prompt)
 	}
 	if !strings.HasSuffix(prompt, "\n差分:\ndiff --git a b") {
 		t.Fatalf("BuildPrompt() prompt suffix = %q", prompt)
+	}
+}
+
+func TestBuildPromptPreservesExistingCommitMessageNewline(t *testing.T) {
+	prompt, err := BuildPrompt("feat: test\n", nil, "diff --git a b")
+	if err != nil {
+		t.Fatalf("BuildPrompt() error = %v, want nil", err)
+	}
+
+	if strings.Contains(prompt, "feat: test\n\nファイル一覧:") {
+		t.Fatalf("BuildPrompt() prompt added an extra newline:\n%s", prompt)
 	}
 }
 
