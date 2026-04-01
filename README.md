@@ -82,4 +82,4 @@ go test ./cmd/review ./pkg/...
 
 - Git
 - Go 1.24 以上
-- GitHub Copilot CLI (`copilot` コマンド)
+- GitHub Copilot SDK for Go (`github.com/github/copilot-sdk/go`)
